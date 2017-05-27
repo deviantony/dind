@@ -1,0 +1,18 @@
+version: '3'
+services:
+  docker-manager:
+    image: 'docker:dind'
+    privileged: true
+  docker-worker:
+    image: 'docker:dind'
+    privileged: true
+  commander:
+    image: 'docker:dind'
+    depends_on:
+      - docker-manager
+      - docker-worker
+    command: >
+      sh -c "sleep 3
+      && docker -H docker-manager swarm init
+      && token=$$(docker -H docker-manager swarm join-token -q worker)
+      && docker -H docker-worker swarm join --token $${token} docker-manager:2377"
